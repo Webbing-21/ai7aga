@@ -7,7 +7,7 @@ const UserSchema = new Schema({
     password: {type:String,required:true},
     role:{ type: String, default: 'user' },
     otp: { type: String }, 
-    otpExpires: { type: Date } 
+    otpExpires: { type: Date }
 });
 UserSchema.methods.comparepassword= async function(password) {
     return await bcrypt.compare(password,this.password);
