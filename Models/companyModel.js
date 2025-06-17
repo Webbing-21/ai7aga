@@ -2,11 +2,14 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const joi = require('joi');
 const companySchema = new Schema({
-    name: { type: String, required: true, unique: true },
-   about: { type: String, required: true },
-    location: {type: String, required: true },
+    name: { type: String, required: true, unique: true, trim: true, minlength: 3, maxlength: 50 },
+   about: { type: String, required: true ,trim: true, minlength: 10, maxlength: 500 },
+    branches: {
+        type: [String], 
+        required: true 
+    },
    socialmedia:{
-    type:[string],
+    type:[String],
     default: [],
    },
     website: { type: String, required: true },

@@ -15,3 +15,7 @@ function validateCode(obj) {
     });
     return codeJoiSchema.validate(obj);
 }
+module.exports = {
+    Code: mongoose.model('Code', codeSchema),
+    validateCode
+};
