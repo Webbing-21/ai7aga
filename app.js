@@ -10,6 +10,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+app.use("/api/auth",require("./Routes/auth"));
 app.listen(process.env.PORT, () => {
     console.log(`Server is Running on Your Port`);
 })
