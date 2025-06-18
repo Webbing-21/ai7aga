@@ -19,7 +19,7 @@ const categorySchema = new Schema({
     }
   },
   subcategory: { type: String },
-  subphoto: {
+  subphoto: { 
     url: {
       type: String,
       default: ''
@@ -61,7 +61,7 @@ const ServiceSchema = new Schema({
   ratings: [ratingSchema],
   rating: { type: Number, default: 0, min: 0, max: 5 },
   ratingCount: { type: Number, default: 0, min: 0 },
-  canBook: { type: Boolean, default: false }
+  canBook: { type: Boolean, default: false },
 });
 
 
