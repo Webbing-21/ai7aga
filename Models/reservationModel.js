@@ -19,7 +19,6 @@ const bookingSchema = new Schema({
   phonenumber: { type: String, required: true, match: /^01[0125][0-9]{8}$/ },
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   serviceId: { type: Schema.Types.ObjectId, ref: 'Service', required: true },
-  categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
   timeSlotId: { type: Schema.Types.ObjectId, ref: 'AvailableTime', required: true }, 
   status: { type: String, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending' }
 }, { timestamps: true });
@@ -29,7 +28,6 @@ function validateBooking(obj) {
     phonenumber: joi.string().pattern(/^01[0125][0-9]{8}$/).required(),
     userId: joi.string().required(),
     serviceId: joi.string().required(),
-    categoryId: joi.string().required(),
     timeSlotId: joi.string().required(),
     status: joi.string().valid('pending', 'confirmed', 'cancelled').default('pending')
     });

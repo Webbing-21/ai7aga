@@ -8,9 +8,27 @@ const ratingSchema = new Schema({
 });
 const categorySchema = new Schema({
   maincategory: { type: String, required: true },
-  mainphoto: { type: String, required: true },
-  subcategory: { type: String, required: true },
-  subphoto: { type: String }
+  mainphoto: {   
+    url: {
+      type: String,
+      default: ''
+    },
+    id: {
+      type: String,
+      default: ''
+    }
+  },
+  subcategory: { type: String },
+  subphoto: {
+    url: {
+      type: String,
+      default: ''
+    },
+    id: {
+      type: String,
+      default: ''
+    }
+  }
 });
 const ServiceSchema = new Schema({
   categoryId: {

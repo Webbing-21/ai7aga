@@ -13,13 +13,32 @@ const companySchema = new Schema({
     default: [],
    },
     website: { type: String, required: true },
-    logo: { type: String, required: true },
-    coverImage: { type: String, required: true },
+    logo: { 
+          url: {
+      type: String,
+      default: ''
+    },
+     id:{
+        type: String,
+        default: ''
+     } 
+     },
+    coverImage: { 
+          url: {
+      type: String,
+      default: ''
+    },
+     id:{
+        type: String,
+        default: ''
+     } 
+    },
     theme: { type: String, required: true, default: '#000000' },
     usercode:{
         type:[String],
         default: [],
-    }
+    },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 });
 function validateCompany(obj) {
     const companyJoiSchema = joi.object({
@@ -28,8 +47,14 @@ function validateCompany(obj) {
         location: joi.string().required(),
         socialmedia: joi.array().items(joi.string()),
         website: joi.string().required(),
-        logo: joi.string().required(),
-        coverImage: joi.string().required(),
+        logo: joi.object({
+            url: joi.string().required(),
+            id: joi.string().required()
+        }).required(),
+        coverImage: joi.object({
+            url: joi.string().required(),
+            id: joi.string().required()
+        }).required(),
         theme: joi.string().default('#000000'),
     });
     return companyJoiSchema.validate(obj);
