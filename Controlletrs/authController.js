@@ -56,14 +56,20 @@ module.exports.completeRegister = asyncHandler(async (req, res) => {
   const { error } = validateCompleteRegister(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  const { phone, name, email, password, company, CompanyCode, jobTitle, location, userId } = req.body;
+  const { phone, name, email, password, company, CompanyCode, jobTitle, location } = req.body;
+  const files = req.files;
 
   const user = await UserModel.findOne({ phone });
-  if (!user || !user.isVerified) return res.status(400).json({ message: "يرجى التحقق من الهاتف أولًا" });
-  if (user.password) return res.status(400).json({ message: "تم تسجيل الحساب مسبقًا" });
+  if (!user || !user.isVerified) return res.status(400).json({ message: "please verify your phone number" });
+  if (user.password) return res.status(400).json({ message: "user already registered" });
+
+  if (!files || files.length === 0) {
+    return res.status(400).json({ message: "please upload at least one image" });
+  }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // إضافة الصور كمصفوفة من Buffer
   user.name = name;
   user.email = email;
   user.password = hashedPassword;
@@ -71,11 +77,15 @@ module.exports.completeRegister = asyncHandler(async (req, res) => {
   user.CompanyCode = CompanyCode;
   user.jobTitle = jobTitle;
   user.location = location;
-  user.userId = userId;
+  user.idimage = files.map(file => ({
+    data: file.buffer,
+    contentType: file.mimetype,
+  }));
 
   await user.save();
   res.status(201).json({ message: "تم إكمال التسجيل بنجاح" });
 });
+
 
 // إرسال كود الدخول
 module.exports.sendLoginOTP = asyncHandler(async (req, res) => {

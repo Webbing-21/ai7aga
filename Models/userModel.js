@@ -63,17 +63,10 @@ const UserSchema = new Schema({
   },
   idimage: [
     {
-      url: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      publicId: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-    },
+      data: Buffer,
+      contentType: String,
+    }
+    
   ],
   location: {
     type: String,
@@ -95,7 +88,6 @@ function validateRegister(obj) {
   });
   return schema.validate(obj);
 }
-
 function validateCompleteRegister(obj) {
   const schema = Joi.object({
     phone: Joi.string().pattern(/^01[0125][0-9]{8}$/).required(),
@@ -106,9 +98,11 @@ function validateCompleteRegister(obj) {
     CompanyCode: Joi.string().min(3).max(50).required(),
     jobTitle: Joi.string().min(3).max(50).required(),
     location: Joi.string().min(3).max(50).required(),
+   
   });
   return schema.validate(obj);
 }
+
 
 function validateLogin(obj) {
   const schema = Joi.object({
