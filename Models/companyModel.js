@@ -14,24 +14,12 @@ const companySchema = new Schema({
    },
     website: { type: String, required: true },
     logo: { 
-          url: {
-      type: String,
-      default: ''
-    },
-     id:{
-        type: String,
-        default: ''
-     } 
+        data: Buffer,
+        contentType: String,
      },
     coverImage: { 
-          url: {
-      type: String,
-      default: ''
-    },
-     id:{
-        type: String,
-        default: ''
-     } 
+        data: Buffer,
+    contentType: String,
     },
     theme: { type: String, required: true, default: '#000000' },
     usercode:{
@@ -48,12 +36,12 @@ function validateCompany(obj) {
         socialmedia: joi.array().items(joi.string()),
         website: joi.string().required(),
         logo: joi.object({
-            url: joi.string().required(),
-            id: joi.string().required()
+            data: joi.binary().required(),
+            contentType: joi.string().required()
         }).required(),
         coverImage: joi.object({
-            url: joi.string().required(),
-            id: joi.string().required()
+            data: joi.binary().required(),
+            contentType: joi.string().required()
         }).required(),
         theme: joi.string().default('#000000'),
     });

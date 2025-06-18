@@ -7,14 +7,8 @@ const serviceItemSchema = new Schema({
     description: { type: String, required: true, trim: true, minlength: 10, maxlength: 500 },
     price: { type: Number, required: true, min: 0 },
     image:{
-          url: {
-      type: String,
-      default: ''
-    },
-     id:{
-        type: String,
-        default: ''
-     } 
+        data: Buffer,
+        contentType: String,
         },
         categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true }
     }, { timestamps: true });
@@ -25,8 +19,8 @@ function validateServiceItem(obj) {
         description: joi.string().min(10).max(500).required(),
         price: joi.number().min(0).required(),
         image:joi.object({
-                    url: joi.string().required(),
-                    id: joi.string().required()
+            data: joi.binary().required(),
+            contentType: joi.string().required()
                 }).required(),
         categoryId: joi.string().required()
     });
