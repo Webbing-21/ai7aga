@@ -92,7 +92,13 @@ const UserSchema = new Schema({
           token:{
             type:String,
             default:null,
-          }
+          },
+          Idimage: [
+            {
+              data: Buffer,
+              contentType: String,
+            }
+          ]
          
         },{timestamps:true});
 
@@ -105,6 +111,9 @@ function validateRegister(obj) {
         password:Joi.string().min(8).max(50).required(),
         company:Joi.string().min(3).max(50).required(),
         CompanyCode:Joi.string().min(3).max(50).required(),
+        jobTitle:Joi.string().min(3).max(50).required(),
+        email:Joi.string().email().min(3).max(100).required(),
+
         
     })
     return schema.validate(obj);
