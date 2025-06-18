@@ -12,6 +12,9 @@ app.use(cors({
 }));
 app.use("/api/auth",require("./Routes/auth"));
 app.use("/api/company",require("./Routes/campany"));
+app.use("/api/order",require("./Routes/order"));
+app.use("/api/code",require("./Routes/code"));
+app.use("/api/booking",require("./Routes/booking"));
 app.listen(process.env.PORT, () => {
     console.log(`Server is Running on Your Port`);
 })

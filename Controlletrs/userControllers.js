@@ -105,10 +105,10 @@ module.exports.loginWithOTP = asyncHandler(async (req, res) => {
   const { phone, otp } = req.body;
 
   const user = await UserModel.findOne({ phone });
-  if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
+  if (!user) return res.status(404).json({ message: " user not found" });
 
   if (!isOTPValid(user, otp)) {
-    return res.status(400).json({ message: "كود التفعيل غير صحيح أو منتهي الصلاحية" });
+    return res.status(400).json({ message: "invalid otp" });
   }
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
