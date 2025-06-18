@@ -1,10 +1,10 @@
-const { UserModel, validateRegister } = require("../Models/userModel");
+const { UserModel, validateRegister, validateCompleteRegister, validateLogin } = require("../Models/userModel");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sendOTP = require("../config/sendSMS");
 
-// دالة مساعدة للتحقق من صحة كود OTP
+// دالة مساعدة للتحقق من كود OTP
 const isOTPValid = (user, otp) => {
   return (
     user.otp &&
@@ -16,20 +16,15 @@ const isOTPValid = (user, otp) => {
 
 // إرسال كود التسجيل
 module.exports.sendRegisterCode = asyncHandler(async (req, res) => {
+  const { error } = validateRegister(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
   const { phone } = req.body;
-
-  if (!/^01[0125][0-9]{8}$/.test(phone)) {
-    return res.status(400).json({ message: "رقم الهاتف غير صالح" });
-  }
-
   const userExist = await UserModel.findOne({ phone });
   if (userExist) return res.status(400).json({ message: "الرقم مستخدم بالفعل" });
 
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const otp = {
-    code: otpCode,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-  };
+  const otp = { code: otpCode, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
 
   const user = new UserModel({ phone, otp });
   await user.save();
@@ -38,14 +33,13 @@ module.exports.sendRegisterCode = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "تم إرسال كود التفعيل" });
 });
 
-// التحقق من كود التفعيل للتسجيل
+// التحقق من كود التفعيل
 module.exports.verifyRegisterOTP = asyncHandler(async (req, res) => {
   const { phone, otp } = req.body;
   const user = await UserModel.findOne({ phone });
 
   if (!user) return res.status(404).json({ message: "رقم غير مسجل" });
   if (user.isVerified) return res.status(400).json({ message: "تم التحقق مسبقًا" });
-
   if (!isOTPValid(user, otp)) {
     return res.status(400).json({ message: "كود التفعيل غير صحيح أو منتهي الصلاحية" });
   }
@@ -59,6 +53,9 @@ module.exports.verifyRegisterOTP = asyncHandler(async (req, res) => {
 
 // إكمال التسجيل بعد التحقق
 module.exports.completeRegister = asyncHandler(async (req, res) => {
+  const { error } = validateCompleteRegister(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
   const { phone, name, email, password, company, CompanyCode, jobTitle, location, userId } = req.body;
 
   const user = await UserModel.findOne({ phone });
@@ -88,10 +85,7 @@ module.exports.sendLoginOTP = asyncHandler(async (req, res) => {
   if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
 
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const otp = {
-    code: otpCode,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-  };
+  const otp = { code: otpCode, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
 
   user.otp = otp;
   await user.save();
@@ -102,8 +96,10 @@ module.exports.sendLoginOTP = asyncHandler(async (req, res) => {
 
 // تسجيل الدخول باستخدام OTP
 module.exports.loginWithOTP = asyncHandler(async (req, res) => {
-  const { phone, otp } = req.body;
+  const { error } = validateLogin(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
 
+  const { phone, otp } = req.body;
   const user = await UserModel.findOne({ phone });
   if (!user) return res.status(404).json({ message: " user not found" });
 
@@ -127,25 +123,6 @@ module.exports.loginWithOTP = asyncHandler(async (req, res) => {
     .json({ message: "تم تسجيل الدخول بنجاح", token });
 });
 
-// تفعيل الحساب (نسخة إضافية إن احتجتها)
-module.exports.verifyUser = asyncHandler(async (req, res) => {
-  const { phone, otp } = req.body;
-  const user = await UserModel.findOne({ phone });
-
-  if (!user) return res.status(404).json({ message: "المستخدم غير موجود." });
-  if (user.isVerified) return res.status(400).json({ message: "المستخدم مفعل بالفعل." });
-
-  if (!isOTPValid(user, otp)) {
-    return res.status(400).json({ message: "كود التفعيل غير صحيح أو منتهي الصلاحية." });
-  }
-
-  user.isVerified = true;
-  user.otp = { code: null, expiresAt: null };
-  await user.save();
-
-  res.status(200).json({ message: "تم تفعيل الحساب بنجاح." });
-});
-
 // تسجيل الخروج
 module.exports.logOut = asyncHandler(async (req, res) => {
   res.clearCookie("token");
@@ -159,10 +136,7 @@ module.exports.sendCodeResetBassword = asyncHandler(async (req, res) => {
   if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
 
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const otp = {
-    code: otpCode,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-  };
+  const otp = { code: otpCode, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
 
   user.otp = otp;
   await user.save();
