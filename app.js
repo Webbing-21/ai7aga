@@ -11,6 +11,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use("/api/auth",require("./Routes/auth"));
+app.use("/api/company",require("./Routes/campany"));
 app.listen(process.env.PORT, () => {
     console.log(`Server is Running on Your Port`);
 })
