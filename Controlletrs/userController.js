@@ -1,4 +1,5 @@
 const Search= require('../Models/searchModel');
+const User = require('../Models/userModel');
 exports.storeSearch = async (req, res) => {
   try {
     const { searchTerm, results, modelType } = req.body;
@@ -78,3 +79,90 @@ exports.updateProfile = async (req, res) => {
         res.status(500).json({ message: "Something went wrong" });
     }
 }
+exports.getProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).select('name email phone');
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+  exports.deleteAccount = async (req, res) => {
+    try {
+      const {companyId} = req.params;
+      if(!companyId) {
+        const userId = req.user.id;
+        const user = await User.findByIdAndDelete(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ message: 'Account deleted successfully' });
+      } else {
+        const name = req.body;
+        const user = await User.findOneAndDelete({  name: { $regex: new RegExp(name, 'i') }, companyId });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found in this company' });
+        }
+        res.status(200).json({ message: 'Account deleted successfully from company' });
+      }
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+exports.findUserInCompany = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const { username } = req.body;
+
+    if (!companyId || !username) {
+      return res.status(400).json({ message: 'companyId and username are required' });
+    }
+
+    const user = await User.findOne({
+      companyId,
+      name: { $regex: new RegExp(username, 'i') } 
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found in this company' });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error finding user:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+// exports.deleteUserInCompany = async (req, res) => {
+//   try {
+//     const { companyId } = req.params;
+//     const { username } = req.body;
+
+//     if (!companyId || !username) {
+//       return res.status(400).json({ message: 'companyId and username are required' });
+//     }
+
+//     const user = await User.findOne({
+//       companyId,
+//       name: { $regex: new RegExp(username, 'i') }
+//     });
+
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found in this company' });
+//     }
+//     const deletedUser = await User.findByIdAndDelete(user._id);
+//     res.status(200).json("user deleted successfully");
+//   } catch (error) {
+//     console.error('Error finding user:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// };
+

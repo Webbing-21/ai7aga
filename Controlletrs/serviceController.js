@@ -119,7 +119,7 @@ exports.deleteService = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-eexports.rate = async (req, res) => {
+exports.rate = async (req, res) => {
   try {
     const { rating } = req.body;
     const { serviceId } = req.params;

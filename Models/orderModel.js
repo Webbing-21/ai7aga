@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ordersSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
-    serviceId: { type: Schema.Types.ObjectId, ref: 'Service', required: true },
     codeId: { type: Schema.Types.ObjectId, ref: 'Code', required: true },
     orderCount: { type: Number, required: true, min: 1 },
+    cartItemId: { type: Schema.Types.ObjectId, ref: 'Cartitem', required: true },
     status: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' },
 }, { timestamps: true });
 const Order = mongoose.model('Order', ordersSchema);

@@ -1,3 +1,5 @@
+const serviceItemSchema = require('../models/serviceItemModel');
+const { validateServiceItem } = require('../models/serviceItemModel');
 exports.addServiceItem = async (req, res) => {
     try {
         const { serviceId } = req.params;

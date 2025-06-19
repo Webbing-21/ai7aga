@@ -21,7 +21,6 @@ const companySchema = new Schema({
   },
   theme: { type: String, required: true, default: '#000000' },
   usercode: { type: [String], default: [] },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 });
 
 const Campany = mongoose.model('Company', companySchema);
