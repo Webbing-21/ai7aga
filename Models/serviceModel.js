@@ -133,14 +133,29 @@ function validateBranch(obj) {
   })
   return schema.validate(obj);
 }
+function validateSubcategory(obj) {
+  const schema = Joi.object({
+    name: Joi.string().required().min(3).max(50),
+    description: Joi.string().required().min(10).max(500),
+    photo: Joi.object({
+      data: Joi.binary().required(),
+      contentType: Joi.string().required()
+    }),
+    categoryId: Joi.string().required()
+  });
+
+  return schema.validate(obj);
+}
 
 module.exports = {
   Service: mongoose.model('Service', ServiceSchema),
   Branch: mongoose.model('Branch', branchSchema),
   Rating: mongoose.model('Rating', ratingSchema),
   Category: mongoose.model('Category', categorySchema),
+  subcategorySchema: mongoose.model('Subcategory', subcategorySchema),
   ServiceSchema,
   ratingSchema,
+  validateSubcategory,
   validateService,
   validateCategory,
   validateBranch
