@@ -172,5 +172,21 @@ exports.rate = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+exports.getTopBrandsByOffer = async (req, res) => {
+  try {
+    const topServices = await Service.find({ offerpercentage: { $gt: 0 } })
+      .sort({ offerpercentage: -1 })
+      .limit(10) 
+      .populate('categoryId', 'category')
+      .select('name offerpercentage coverimage serviceImage');
 
+    if (!topServices.length) {
+      return res.status(404).json({ message: 'No services with offers found.' });
+    }
 
+    res.status(200).json({ topBrands: topServices });
+  } catch (error) {
+    console.error('Error fetching top brands:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

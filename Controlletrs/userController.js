@@ -1,5 +1,7 @@
 const Search= require('../Models/searchModel');
 const User = require('../Models/userModel');
+const ServiceItem = require('../models/serviceItemModel');
+
 exports.storeSearch = async (req, res) => {
   try {
     const { searchTerm, results, modelType } = req.body;
@@ -165,4 +167,33 @@ exports.findUserInCompany = async (req, res) => {
 //     res.status(500).json({ message: 'Internal server error' });
 //   }
 // };
+exports.getRecentServiceItems = async (req, res) => {
+  try {
+    const userId = req.user.id; // Assuming authentication middleware sets req.user
 
+    // Find recent searches related to ServiceItem
+    const recentSearches = await Search.find({
+      userId,
+      modelType: 'ServiceItem'
+    })
+    .sort({ createdAt: -1 }) // Most recent first
+    .limit(5); // Limit the number of searches (optional)
+
+    // Extract all result IDs (flatten array)
+    const serviceItemIds = recentSearches.flatMap(search => search.results);
+
+    // Remove duplicates (optional)
+    const uniqueItemIds = [...new Set(serviceItemIds.map(id => id.toString()))];
+
+    // Fetch the actual ServiceItem documents
+    const serviceItems = await ServiceItem.find({
+      _id: { $in: uniqueItemIds }
+    });
+
+    res.status(200).json({ serviceItems });
+
+  } catch (error) {
+    console.error('Error fetching recent ServiceItems:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
