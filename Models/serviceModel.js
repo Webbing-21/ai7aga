@@ -19,6 +19,20 @@ const categorySchema = new Schema({
   }
   
 });
+const branchSchema = new Schema({
+  serviceId:{
+    type: Schema.Types.ObjectId,
+    ref: 'Service',
+    required: true
+  },
+ city: { type: String, required: true },
+ address: { type: String, required: true },
+ openingHours: {
+   type: String,
+    required: true,
+    },
+    phoneNumber: { type: String, required: true },
+  });
 const ServiceSchema = new Schema({
   categoryId: {
     type: Schema.Types.ObjectId,
@@ -55,6 +69,13 @@ const ServiceSchema = new Schema({
   rating: { type: Number, default: 0, min: 0, max: 5 },
   ratingCount: { type: Number, default: 0, min: 0 },
   canBook: { type: Boolean, default: false },
+  offerpercent: { type: Number, default: 0, min: 0, max: 100 },
+  offerdiscription:[ { 
+    type: String, 
+    default: '' ,
+    minlength: 0,
+    maxlength: 100
+  }]
 });
 
 
@@ -83,6 +104,7 @@ function validateService(obj) {
     canBook: Joi.boolean()
   });
 
+
   return schema.validate(obj);
 }
 
@@ -98,13 +120,26 @@ function validateCategory(obj) {
 
   return schema.validate(obj);
 }
-
+function validateBranch(obj) {
+  const schema = Joi.object({
+    name: Joi.string().required().min(3).max(50),
+    city: Joi.string().required(),
+    address: Joi.string().required(),
+    openingHours: Joi.string().required(),
+    phoneNumber: Joi.string().required(),
+    serviceId: Joi.string().required()
+  })
+  return schema.validate(obj);
+}
 
 module.exports = {
   Service: mongoose.model('Service', ServiceSchema),
+  Branch: mongoose.model('Branch', branchSchema),
+  Rating: mongoose.model('Rating', ratingSchema),
   Category: mongoose.model('Category', categorySchema),
   ServiceSchema,
   ratingSchema,
   validateService,
-  validateCategory
+  validateCategory,
+  validateBranch
 };

@@ -10,13 +10,16 @@ const BookingSchema = new mongoose.Schema({
     ref:'Service',
     required:true
   },
-  name:{
+  fullname:{
     type:String,
-    required:true
+    required:true,
+    minlength:3,
+    maxlength:50
   },
   phone:{
     type:Number,
-    required:true
+    required:true,
+    match:  /^01[0125][0-9]{8}$/, // Adjust regex for phone number validation
   },
   date:{
     type:Date,
