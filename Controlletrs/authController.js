@@ -3,7 +3,8 @@ const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sendOTP = require("../config/sendSMS");
-
+const {Campany} = require("../Models/companyModel");
+const {companyCode} = require("../Models/companyModel");
 // دالة مساعدة للتحقق من كود OTP
 const isOTPValid = (user, otp) => {
   return (
@@ -25,11 +26,11 @@ module.exports.sendRegisterCode = asyncHandler(async (req, res) => {
 
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
   const otp = { code: otpCode, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
-
+console.log(otp)
   const user = new UserModel({ phone, otp });
   await user.save();
 
-  await sendOTP(`+2${phone}`, otpCode);
+  // await sendOTP(`+2${phone}`, otpCode);
   res.status(200).json({ message: "تم إرسال كود التفعيل" });
 });
 
@@ -38,11 +39,10 @@ module.exports.verifyRegisterOTP = asyncHandler(async (req, res) => {
   const { phone, otp } = req.body;
   const user = await UserModel.findOne({ phone });
 
-  if (!user) return res.status(404).json({ message: "رقم غير مسجل" });
-  if (user.isVerified) return res.status(400).json({ message: "تم التحقق مسبقًا" });
-  if (!isOTPValid(user, otp)) {
-    return res.status(400).json({ message: "كود التفعيل غير صحيح أو منتهي الصلاحية" });
-  }
+  if (!user) return res.status(404).json({ message: " this phone number is not registered" });
+  if (user.isVerified) return res.status(400).json({ message: " this phone number is already verified" });
+ if(user.otp.code !== otp) return res.status(400).json({ message: "invalid otp" });
+ if(user.otp.expiresAt < new Date()) return res.status(400).json({ message: "otp expired" });
 
   user.isVerified = true;
   user.otp = { code: null, expiresAt: null };
@@ -68,7 +68,10 @@ module.exports.completeRegister = asyncHandler(async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-
+  const checkCampany = await Campany.findOne({ code: CompanyCode });
+  if (!checkCampany) return res.status(400).json({ message: "invalid company code" });
+  const checkCompanyCode = await companyCode.findOne({ code: CompanyCode });
+  if (!checkCompanyCode) return res.status(400).json({ message: "invalid company code" });
   // إضافة الصور كمصفوفة من Buffer
   user.name = name;
   user.email = email;

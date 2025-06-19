@@ -17,7 +17,7 @@ const upload = multer({ storage });
 
 // ✅ التسجيل
 router.post("/register", sendRegisterCode); // إرسال كود التسجيل
-router.post("/register/verify", verifyRegisterOTP); // التحقق من كود OTP
+router.post("/register/verify", verifyRegisterOTP); // التحقق من كود OTP 
 router.post("/register/complete",upload.array('image'), completeRegister); // إكمال التسجيل
 
 // ✅ تسجيل الدخول
