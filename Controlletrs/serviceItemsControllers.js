@@ -1,37 +1,37 @@
 const serviceItemSchema = require('../models/serviceItemModel');
 const { validateServiceItem } = require('../models/serviceItemModel');
 exports.addServiceItem = async (req, res) => {
-    try {
-        const { serviceId } = req.params;
-        const { name, description, price, coverimage, serviceimage } = req.body;
+  try {
+    const { serviceId } = req.params;
+    const { name, description, price } = req.body;
 
-        const { error } = validateServiceItem({
-            name,
-            description,
-            price,
-            coverimage,
-            serviceimage
-        });
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
-
-        const serviceItem = new serviceItemSchema({
-            serviceId,
-            name,
-            description,
-            price,
-            coverimage,
-            serviceimage
-        });
-
-        await serviceItem.save();
-        res.status(201).json({ message: 'Service item added successfully', serviceItem });
-    } catch (error) {
-        console.error('Error adding service item:', error);
-        res.status(500).json({ message: 'Internal server error' });
+    const { error } = validateServiceItem({ name, description, price });
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
     }
-}
+
+    const serviceItem = new ServiceItem({
+      serviceId,
+      name,
+      description,
+      price,
+      coverimage: {
+        data: req.files['coverimage'][0].buffer,
+        contentType: req.files['coverimage'][0].mimetype
+      },
+      serviceimage: req.files['serviceimage'].map(file => ({
+        data: file.buffer,
+        contentType: file.mimetype
+      }))
+    });
+
+    await serviceItem.save();
+    res.status(201).json({ message: 'Service item added successfully', serviceItem });
+  } catch (error) {
+    console.error('Error adding service item:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 exports.getServiceItems = async (req, res) => {
     try {
         const { serviceId } = req.body;
