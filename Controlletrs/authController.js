@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const sendOTP = require("../config/sendSMS");
 const {Campany} = require("../Models/companyModel");
 const {companyCode} = require("../Models/companyModel");
+
 // دالة مساعدة للتحقق من كود OTP
 const isOTPValid = (user, otp) => {
   return (
@@ -22,7 +23,7 @@ module.exports.sendRegisterCode = asyncHandler(async (req, res) => {
 
   const { phone } = req.body;
   const userExist = await UserModel.findOne({ phone });
-  if (userExist) return res.status(400).json({ message: "الرقم مستخدم بالفعل" });
+  if (userExist) return res.status(400).json({ message: "this phone number is already registered" });
 
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
   const otp = { code: otpCode, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
@@ -31,7 +32,7 @@ console.log(otp)
   await user.save();
 
   // await sendOTP(`+2${phone}`, otpCode);
-  res.status(200).json({ message: "تم إرسال كود التفعيل" });
+  res.status(200).json({ message: "otp sent successfully" });
 });
 
 // التحقق من كود التفعيل
@@ -48,10 +49,9 @@ module.exports.verifyRegisterOTP = asyncHandler(async (req, res) => {
   user.otp = { code: null, expiresAt: null };
   await user.save();
 
-  res.status(200).json({ message: "تم التحقق بنجاح، يمكنك متابعة التسجيل" });
+  res.status(200).json({ message: "otp verified successfully" });
 });
 
-// إكمال التسجيل بعد التحقق
 module.exports.completeRegister = asyncHandler(async (req, res) => {
   const { error } = validateCompleteRegister(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
@@ -95,16 +95,16 @@ module.exports.sendLoginOTP = asyncHandler(async (req, res) => {
   const { phone } = req.body;
 
   const user = await UserModel.findOne({ phone });
-  if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
+  if (!user) return res.status(404).json({ message: "user not found" });
 
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
   const otp = { code: otpCode, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
-
+console.log(otp)
   user.otp = otp;
   await user.save();
 
-  await sendOTP(`+2${phone}`, otpCode);
-  res.status(200).json({ message: "تم إرسال كود الدخول على رقم الهاتف" });
+  // await sendOTP(`+2${phone}`, otpCode);
+  res.status(200).json({ message: "otp sent successfully" });
 });
 
 // تسجيل الدخول باستخدام OTP
@@ -114,39 +114,41 @@ module.exports.loginWithOTP = asyncHandler(async (req, res) => {
 
   const { phone, otp } = req.body;
   const user = await UserModel.findOne({ phone });
-  if (!user) return res.status(404).json({ message: " user not found" });
+  if (!user) return res.status(404).json({ message: "user not found" });
 
-  if (!isOTPValid(user, otp)) {
-    return res.status(400).json({ message: "invalid otp" });
-  }
-
+  // ✅ التحقق من صلاحية الكود وتطابقه
+ if ( user.otp.code !== otp) return res.status(400).json({message:'otp is not vaild'})
+ if(user.otp.expiresAt < new Date()) return res.status(400).json({message:'otp expired'})
+if(user.otp.code === null) return res.status(400).json({message:'otp is not vaild'})
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h"
+    expiresIn: "1h",
   });
 
   user.otp = { code: null, expiresAt: null };
   await user.save();
 
-  res.status(200)
+  res
+    .status(200)
     .cookie("token", token, {
       httpOnly: true,
       secure: true,
-      maxAge: 3600000
+      maxAge: 3600000,
     })
-    .json({ message: "تم تسجيل الدخول بنجاح", token });
+    .json({ message: "login successfully", token });
 });
+
 
 // تسجيل الخروج
 module.exports.logOut = asyncHandler(async (req, res) => {
   res.clearCookie("token");
-  res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
+  res.status(200).json({ message:  "logged out successfully" });
 });
 
 // إرسال كود إعادة تعيين الباسورد
 module.exports.sendCodeResetBassword = asyncHandler(async (req, res) => {
   const { phone } = req.body;
   const user = await UserModel.findOne({ phone });
-  if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
+  if (!user) return res.status(404).json({ message: "user not found" });
 
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
   const otp = { code: otpCode, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
@@ -155,17 +157,17 @@ module.exports.sendCodeResetBassword = asyncHandler(async (req, res) => {
   await user.save();
 
   await sendOTP(`+2${phone}`, otpCode);
-  res.status(200).json({ message: "تم إرسال كود التفعيل إلى رقم الهاتف" });
+  res.status(200).json({ message: "otp sent successfully" });
 });
 
 // إعادة تعيين كلمة المرور
 module.exports.resetPassword = asyncHandler(async (req, res) => {
   const { phone, otp, password } = req.body;
   const user = await UserModel.findOne({ phone });
-  if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
+  if (!user) return res.status(404).json({ message: "user not found" });
 
   if (!isOTPValid(user, otp)) {
-    return res.status(400).json({ message: "كود التفعيل غير صحيح أو منتهي الصلاحية" });
+    return res.status(400).json({ message: "invalid otp" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -173,5 +175,5 @@ module.exports.resetPassword = asyncHandler(async (req, res) => {
   user.otp = { code: null, expiresAt: null };
   await user.save();
 
-  res.status(200).json({ message: "تم إعادة تعيين كلمة المرور بنجاح" });
+  res.status(200).json({ message: "password reset successfully" });
 });

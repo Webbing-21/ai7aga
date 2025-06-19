@@ -107,7 +107,7 @@ function validateCompleteRegister(obj) {
 function validateLogin(obj) {
   const schema = Joi.object({
     phone: Joi.string().pattern(/^01[0125][0-9]{8}$/).required(),
-    password: Joi.string().min(8).max(50).required(),
+    otp: Joi.number().required(),
   });
   return schema.validate(obj);
 }
