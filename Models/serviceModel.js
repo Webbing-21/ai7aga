@@ -1,44 +1,14 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
 const { Schema } = mongoose;
-const subcategorySchema = new Schema({
-  name: { type: String, required: true },
-  description: { type: String, required: true, trim: true, minlength: 10, maxlength: 500 },
-  photo: {
-  data: Buffer,
-  contentType: String,
-  },
-  categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
-}, { timestamps: true });
 const ratingSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   rating: { type: Number, required: true }
 });
-const categorySchema = new Schema({
-  category: { type: String, required: true },
-  photo: {   
-    data: Buffer,
-    contentType: String,
-  }
-});
-const branchSchema = new Schema({
-  serviceId:{
-    type: Schema.Types.ObjectId,
-    ref: 'Service',
-    required: true
-  },
- city: { type: String, required: true },
- address: { type: String, required: true },
- openingHours: {
-   type: String,
-    required: true,
-    },
-    phoneNumber: { type: String, required: true },
-  });
 const ServiceSchema = new Schema({
-  categoryId: {
+  subcategoryId: {
     type: Schema.Types.ObjectId,
-    ref: 'Category',
+    ref: 'Subcategory',
     required: true
   },
   name: {

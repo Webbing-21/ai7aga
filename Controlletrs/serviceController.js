@@ -1,6 +1,8 @@
-const Category = require('../models/categoryModel');
-const {ServiceSchema,categorySchema,ratingSchema} = require('../models/serviceModel');
+const Category = require('../Models/categoryModel');
 const Invite = require('../Models/inviteLinkModel');
+const Service = require('../Models/serviceModel');
+const ServiceItem = require('../Models/serviceItemsModels');
+
 const crypto = require('crypto');
 exports.addService = async (req, res) => {
     try{
@@ -190,3 +192,39 @@ exports.getTopBrandsByOffer = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+exports.fromCategory = async (req, res) =>  { 
+  try {
+    const { categoryId } = req.params;
+
+    // 1. Get subcategories
+    const subcategories = await SubCategory.find({ categoryId });
+
+    // 2. Get services for all subcategories
+    const subcategoryIds = subcategories.map(sub => sub._id);
+    const services = await Service.find({ subcategoryId: { $in: subcategoryIds } });
+
+    // 3. Get service items for all services
+    const serviceIds = services.map(s => s._id);
+    const serviceItems = await ServiceItem.find({ serviceId: { $in: serviceIds } });
+
+    // 4. Structure result
+    const response = subcategories.map(sub => ({
+      _id: sub._id,
+      name: sub.name,
+      services: services
+        .filter(service => service.subcategoryId.toString() === sub._id.toString())
+        .map(service => ({
+          _id: service._id,
+          name: service.name,
+          serviceItems: serviceItems.filter(
+            item => item.serviceId.toString() === service._id.toString()
+          )
+        }))
+    }));
+
+    res.status(200).json({ categoryId, subcategories: response });
+  } catch (error) {
+    console.error('Error fetching category tree:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}

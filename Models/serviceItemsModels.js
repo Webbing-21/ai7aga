@@ -10,7 +10,14 @@ const serviceItemSchema = new Schema({
         data: Buffer,
         contentType: String,
         },
-        categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true }
+        branch:[{
+            city: { type: String},
+            address: { type: String},
+            openingHours: {
+            type: String,
+    },
+    phoneNumber: { type: String}
+        }]
     }, { timestamps: true });
 function validateServiceItem(obj) {
     const serviceItemJoiSchema = joi.object({

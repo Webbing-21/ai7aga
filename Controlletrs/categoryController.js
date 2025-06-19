@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const Category = require('../models/categoryModel');
-const Service = require('../models/serviceModel');
+const Category = require('../Models/categoryModel');
+const Service = require('../Models/serviceModel');
 const { validateCategory } = require('../validators/categoryValidator');
 
 exports.addCategory = async (req, res) => {

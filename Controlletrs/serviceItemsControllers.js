@@ -32,24 +32,6 @@ exports.addServiceItem = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-exports.getServiceItems = async (req, res) => {
-    try {
-        const { serviceId } = req.body;
-        if (!serviceId) {
-            return res.status(400).json({ message: 'Service ID is required' });
-        }
-
-        const serviceItems = await serviceItemSchema.find({ serviceId }).populate('serviceId', 'name description');
-        if (serviceItems.length === 0) {
-            return res.status(404).json({ message: 'No service items found for this service' });
-        }
-
-        res.status(200).json(serviceItems);
-    } catch (error) {
-        console.error('Error fetching service items:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-}
 exports.updateServiceItem = async (req, res) => {
     try {
         const { serviceItemId } = req.params;
