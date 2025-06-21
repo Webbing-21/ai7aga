@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Category = require('../Models/categoryModel');
 const Service = require('../Models/serviceModel');
 const { validateCategory } = require('../validators/categoryValidator');
+const Subcategory = require('../Models/subCategoryModel');
+const { validateSubcategory } = require('../validators/subcategoryValidator');
 
 exports.addCategory = async (req, res) => {
   try {
@@ -93,6 +95,10 @@ exports.ShowRandomCategoriesWithServices = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied: Only superadmin can update categories.' });
+    }
+
     const { categoryId } = req.params;
     const updatedData = req.body;
 
@@ -115,6 +121,7 @@ exports.updateCategory = async (req, res) => {
     if (!category) return res.status(404).json({ message: 'Category not found' });
 
     res.status(200).json({ message: 'Category updated successfully', category });
+
   } catch (error) {
     console.error('Error updating category:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -123,6 +130,10 @@ exports.updateCategory = async (req, res) => {
 
 exports.deleteCategory = async (req, res) => {
   try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied: Only superadmin can delete categories.' });
+    }
+
     const { categoryId } = req.body;
     if (!categoryId) return res.status(400).json({ message: 'Category ID is required' });
 
@@ -130,15 +141,20 @@ exports.deleteCategory = async (req, res) => {
     if (!category) return res.status(404).json({ message: 'Category not found' });
 
     res.status(200).json({ message: 'Category deleted successfully' });
+
   } catch (error) {
     console.error('Error deleting category:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 exports.addSubcategory = async (req, res) => {
   try {
-    const { name, categoryId } = req.body;
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied: Only superadmin can add subcategories.' });
+    }
 
+    const { name, categoryId } = req.body;
     if (!categoryId) {
       return res.status(400).json({ message: "Category ID is required" });
     }
@@ -148,18 +164,17 @@ exports.addSubcategory = async (req, res) => {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    const subcategory = new Subcategory({
-      name,
-      categoryId
-    });
-
+    const subcategory = new Subcategory({ name, categoryId });
     await subcategory.save();
+
     res.status(201).json({ message: "Subcategory added", subcategory });
+
   } catch (error) {
     console.error("Error adding subcategory:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 exports.getSubcategoriesByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
@@ -189,6 +204,10 @@ exports.searchSubcategories = async (req, res) => {
 };
 exports.updateSubcategory = async (req, res) => {
   try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied: Only superadmin can update subcategories.' });
+    }
+
     const { subcategoryId } = req.params;
     const { name } = req.body;
 
@@ -208,8 +227,13 @@ exports.updateSubcategory = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 exports.deleteSubcategory = async (req, res) => {
   try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied: Only superadmin can delete subcategories.' });
+    }
+
     const { subcategoryId } = req.params;
 
     const deleted = await Subcategory.findByIdAndDelete(subcategoryId);

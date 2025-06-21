@@ -1,7 +1,7 @@
 const { Booking, validateBooking } = require('../Models/reservationModel');
 const asyncHandler = require('express-async-handler');
 const { Code } = require('../Models/codeModel');
-const { Service } = require('../models/serviceModel');
+const { Service } = require('../Models/serviceModel');
 module.exports.createBooking = asyncHandler(async (req, res) => {
   try {
     const { userId, serviceId, name, phone, date, time, code } = req.body;

@@ -1,6 +1,44 @@
 const Order = require('../Models/orderModel');   
 const ServiceItem = require('../Models/ServiceItem');
 const { Cart, CartItem } = require('../Models/cartModel');
+const PlatformSettings = require('../models/platformSettings');
+exports.getPlatformAvailability = async (req, res) => {
+  try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const settings = await PlatformSettings.findOne();
+    if (!settings) {
+      return res.status(404).json({ message: 'Platform settings not found' });
+    }
+
+    res.status(200).json(settings);
+  } catch (error) {
+    console.error('Error fetching platform settings:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+exports.updatePlatformAvailability = async (req, res) => {
+  try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const { available } = req.body;
+
+    const settings = await PlatformSettings.findOneAndUpdate(
+      {},
+      { available },
+      { new: true, upsert: true }
+    );
+
+    res.status(200).json({ message: 'Platform availability updated', settings });
+  } catch (error) {
+    console.error('Error updating platform settings:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 exports.AddToCart = async (req, res) => {
   try {

@@ -3,19 +3,19 @@ const { Company } = require('../Models/companyModel');
 const asyncHandler = require('express-async-handler');
 
 // دالة توليد كود عشوائي
-const generateRandomCode = (length = 6) => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < length; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-};
+// const generateRandomCode = (length = 6) => {
+//   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+//   let code = '';
+//   for (let i = 0; i < length; i++) {
+//     code += chars.charAt(Math.floor(Math.random() * chars.length));
+//   }
+//   return code;
+// };
 
 module.exports.createCode = asyncHandler(async (req, res) => {
-  try {
+  if (req.user.role !== 'superadmin'||req.user.role !== 'admin') {
+    return res.status(403).json({ message: "Access denied" });}
     const { companyId , description , AdminNumber, offer } = req.body;
-
     // تحقق من وجود الشركة
     const company = await Company.findById(companyId);
     if (!company) {
@@ -48,20 +48,18 @@ module.exports.createCode = asyncHandler(async (req, res) => {
     await code.save();
 
     res.status(201).json({ message: "Code created successfully", code });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
 });
 
 module.exports.deleteCode = asyncHandler(async (req, res) => {
-  try {
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied" });
+    }
     const {id} = req.params;
     const code = await Code.findByIdAndDelete(id);
     if(!code){
       return res.status(404).json({message: "Code not found"});
     }
     res.status(200).json({message: "Code deleted successfully", code});
-  }catch(err){res.status(500).json({message: err.message});}
 })
 module.exports.getCodeByCompanyId = asyncHandler(async (req, res) => {
   try {

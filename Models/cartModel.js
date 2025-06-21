@@ -37,6 +37,7 @@ function validateCartItem(obj) {
         userId: joi.string().required()
     });
     return cartItemJoiSchema.validate(obj);
+
 }
 
 module.exports = {

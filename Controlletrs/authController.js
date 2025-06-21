@@ -120,7 +120,7 @@ module.exports.loginWithOTP = asyncHandler(async (req, res) => {
  if ( user.otp.code !== otp) return res.status(400).json({message:'otp is not vaild'})
  if(user.otp.expiresAt < new Date()) return res.status(400).json({message:'otp expired'})
 if(user.otp.code === null) return res.status(400).json({message:'otp is not vaild'})
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id: user._id,companyId:user.companyId,role:user.role }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
 
